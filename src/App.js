@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import fetchImagesAPI, { resetPage } from './sourse/images-API';
 import './App.css';
 import Searchbar from './components/Searchbar';
@@ -8,140 +8,132 @@ import Modal from './components/Modal';
 import Loader from 'react-loader-spinner';
 import Error from './components/Error';
 
-class App extends Component {
-  state = {
-    imageName: '',
-    error: null,
-    imagesSearch: null,
-    status: 'idle',
-    modalIsOpen: false,
-    largeImageNow: null,
-  };
+function App() {
+  const [imageName, setImageName] = useState('');
+  const [error, setError] = useState(null);
+  const [imagesSearch, setImagesSearch] = useState(null);
+  const [status, setStatus] = useState('idle');
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [largeImageNow, setLargeImageNow] = useState(null);
 
-  handleChange = e => {
-    this.setState({ imageName: e.target.value });
-  };
+  // state = {
+  //   imageName: '',
+  //   error: null,
+  //   imagesSearch: null,
+  //   status: 'idle',
+  //   modalIsOpen: false,
+  //   largeImageNow: null,
+  // };
 
-  // componentDidUpdate(prevProps, prevState) {
-  //   if (prevState.imageName !== this.state.imageName) {
-  //     this.setState({ status: 'pending' });
+  function handleChange(e) {
+    setImageName(e.target.value);
+  }
 
-  //     resetPage();
-
-  //     fetchImagesAPI(this.state.imageName)
-  //       .then(imagesOnFeedback => {
-  //         this.setState({
-  //           imagesSearch: imagesOnFeedback.hits,
-  //           status: 'resolved',
-  //         });
-  //       })
-  //       .catch(error => this.setState({ error, status: 'rejected' }));
-  //   }
-  // }
-
-  onLoadMoreClick = e => {
-    fetchImagesAPI(this.state.imageName).then(imagesOnFeedback => {
-      console.log(this.state.imagesSearch);
-      console.log(imagesOnFeedback.hits);
-      this.setState({
-        imagesSearch: [...this.state.imagesSearch, ...imagesOnFeedback.hits],
-      });
+  function onLoadMoreClick(e) {
+    fetchImagesAPI(imageName).then(imagesOnFeedback => {
+      setImagesSearch([...imagesSearch, ...imagesOnFeedback.hits]);
     });
-  };
+  }
 
-  handleOpenModal = e => {
+  function handleOpenModal(e) {
     if (e.target.className === 'ImageGalleryItem-image') {
-      this.setState({
-        modalIsOpen: !this.state.modalIsOpen,
-        largeImageNow: e.target.alt,
-      });
+      setModalIsOpen(true);
+      setLargeImageNow(e.target.alt);
+
+      // setState({
+      //   modalIsOpen: !this.state.modalIsOpen,
+      //   largeImageNow: e.target.alt,
+      // });
     }
-  };
+  }
 
-  handleCloseModal = () => {
-    this.setState({
-      modalIsOpen: !this.state.modalIsOpen,
-      largeImageNow: null,
-    });
-  };
+  function handleCloseModal() {
+    setModalIsOpen(false);
+    setLargeImageNow(null);
 
-  handleFormSubmit = e => {
+    // setState({
+    //   modalIsOpen: !state.modalIsOpen,
+    //   largeImageNow: null,
+    // });
+  }
+
+  function handleFormSubmit(e) {
     e.preventDefault();
-    this.setState({ status: 'pending' });
+    setStatus('pending');
 
     resetPage();
 
-    fetchImagesAPI(this.state.imageName)
+    fetchImagesAPI(imageName)
       .then(imagesOnFeedback => {
-        this.setState({
-          imagesSearch: imagesOnFeedback.hits,
-          status: 'resolved',
-        });
+        setImagesSearch(imagesOnFeedback.hits);
+        setStatus('resolved');
+        // setState({
+        //   imagesSearch: imagesOnFeedback.hits,
+        //   status: 'resolved',
+        // });
       })
-      .catch(error => this.setState({ error, status: 'rejected' }));
-  };
+      .catch(error => {
+        setError(error);
+        setStatus('rejected');
+        // setState({ error, status: 'rejected' });
+      });
+  }
 
-  render() {
-    const { status } = this.state;
-    if (status === 'idle') {
-      return (
-        <>
-          <Searchbar
-            onSubmit={this.handleFormSubmit}
-            onChange={this.handleChange}
-            imageName={this.state.imageName}
-          />
-        </>
-      );
-    }
+  if (status === 'idle') {
+    return (
+      <>
+        <Searchbar
+          onSubmit={handleFormSubmit}
+          onChange={handleChange}
+          imageName={imageName}
+        />
+      </>
+    );
+  }
 
-    if (status === 'pending') {
-      return (
-        <>
-          <Searchbar
-            onSubmit={this.handleFormSubmit}
-            onChange={this.handleChange}
-            imageName={this.state.imageName}
-          />
-          <div className="container-loader">
-            <Loader type="TailSpin" color="#00BFFF" height={80} width={80} />
-          </div>
-        </>
-      );
-    }
+  if (status === 'pending') {
+    return (
+      <>
+        <Searchbar
+          onSubmit={handleFormSubmit}
+          onChange={handleChange}
+          imageName={imageName}
+        />
+        <div className="container-loader">
+          <Loader type="TailSpin" color="#00BFFF" height={80} width={80} />
+        </div>
+      </>
+    );
+  }
 
-    if (status === 'resolved') {
-      return (
-        <>
-          <Searchbar
-            onSubmit={this.handleFormSubmit}
-            onChange={this.handleChange}
-            imageName={this.state.imageName}
-          />
+  if (status === 'resolved') {
+    return (
+      <>
+        <Searchbar
+          onSubmit={handleFormSubmit}
+          onChange={handleChange}
+          imageName={imageName}
+        />
 
-          <ImageGallery
-            imagesSearch={this.state.imagesSearch}
-            loadMore={this.onLoadMoreClick}
-            togleModal={this.handleOpenModal}
-          />
+        <ImageGallery
+          imagesSearch={imagesSearch}
+          loadMore={onLoadMoreClick}
+          togleModal={handleOpenModal}
+        />
 
-          {this.state.modalIsOpen && (
-            <Modal
-              largeImageURL={this.state.largeImageNow}
-              onClose={this.handleCloseModal}
-            />
-          )}
-        </>
-      );
-    }
+        {modalIsOpen && (
+          <Modal largeImageURL={largeImageNow} onClose={handleCloseModal} />
+        )}
+      </>
+    );
+  }
 
-    if (status === 'rejected') {
-      return (
-        <>
-          <Error error={this.state.error} />
-        </>
-      );
-    }
+  if (status === 'rejected') {
+    return (
+      <>
+        <Error error={error} />
+      </>
+    );
   }
 }
 
