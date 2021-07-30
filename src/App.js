@@ -4,7 +4,7 @@ import './App.css';
 import Searchbar from './components/Searchbar';
 import ImageGallery from './components/ImageGallery';
 import Modal from './components/Modal';
-// import Loader from './components/Loader';
+
 import Loader from 'react-loader-spinner';
 import Error from './components/Error';
 
@@ -15,15 +15,6 @@ function App() {
   const [status, setStatus] = useState('idle');
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [largeImageNow, setLargeImageNow] = useState(null);
-
-  // state = {
-  //   imageName: '',
-  //   error: null,
-  //   imagesSearch: null,
-  //   status: 'idle',
-  //   modalIsOpen: false,
-  //   largeImageNow: null,
-  // };
 
   function handleChange(e) {
     setImageName(e.target.value);
@@ -39,22 +30,12 @@ function App() {
     if (e.target.className === 'ImageGalleryItem-image') {
       setModalIsOpen(true);
       setLargeImageNow(e.target.alt);
-
-      // setState({
-      //   modalIsOpen: !this.state.modalIsOpen,
-      //   largeImageNow: e.target.alt,
-      // });
     }
   }
 
   function handleCloseModal() {
     setModalIsOpen(false);
     setLargeImageNow(null);
-
-    // setState({
-    //   modalIsOpen: !state.modalIsOpen,
-    //   largeImageNow: null,
-    // });
   }
 
   function handleFormSubmit(e) {
@@ -67,15 +48,10 @@ function App() {
       .then(imagesOnFeedback => {
         setImagesSearch(imagesOnFeedback.hits);
         setStatus('resolved');
-        // setState({
-        //   imagesSearch: imagesOnFeedback.hits,
-        //   status: 'resolved',
-        // });
       })
       .catch(error => {
         setError(error);
         setStatus('rejected');
-        // setState({ error, status: 'rejected' });
       });
   }
 
